@@ -26,8 +26,8 @@ contract SimpleAccountTest is Test {
         deal(address(account), 1 ether);
         assertEq(address(account).balance, 1 ether);
 
-        // Create dummt user
-        _user = makeAddr("user1");
+        // Create dummy user
+        _user = makeAddr("user");
     }
 
     function testTransfer() public {
