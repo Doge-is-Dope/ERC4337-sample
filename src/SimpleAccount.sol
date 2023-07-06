@@ -2,25 +2,39 @@
 pragma solidity ^0.8.19;
 
 import "openzeppelin/utils/cryptography/ECDSA.sol";
+import "openzeppelin/proxy/utils/Initializable.sol";
+import "openzeppelin/proxy/utils/UUPSUpgradeable.sol";
 import "account-abstraction/core/BaseAccount.sol";
+import "./TokenCallbackHandler.sol";
 
 /// @title Account contract
 /// @notice This contract acts as a wallet, and can be used to execute transactions
-contract Account is BaseAccount {
+contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Initializable {
     using ECDSA for bytes32;
 
     IEntryPoint private immutable _entryPoint;
+
     address public owner;
 
-    event AccountInitialized(IEntryPoint indexed entryPoint, address indexed owner);
+    event SimpleAccountInitialized(IEntryPoint indexed entryPoint, address indexed owner);
+
+    modifier onlyOwner() {
+        _onlyOwner();
+        _;
+    }
 
     constructor(IEntryPoint anEntryPoint) {
         _entryPoint = anEntryPoint;
-        owner = msg.sender;
+        _disableInitializers();
     }
 
     function entryPoint() public view virtual override returns (IEntryPoint) {
         return _entryPoint;
+    }
+
+    function _onlyOwner() internal view {
+        //directly from EOA owner, or through the account itself (which gets redirected through execute())
+        require(msg.sender == owner || msg.sender == address(this), "only owner");
     }
 
     /// @inheritdoc BaseAccount
@@ -66,5 +80,23 @@ contract Account is BaseAccount {
                 revert(add(result, 32), mload(result))
             }
         }
+    }
+
+    /**
+     * @dev The _entryPoint member is immutable, to reduce gas consumption.  To upgrade EntryPoint,
+     * a new implementation of Account must be deployed with the new EntryPoint address, then upgrading
+     * the implementation by calling `upgradeTo()`
+     */
+    function initialize(address anOwner) public virtual initializer {
+        _initialize(anOwner);
+    }
+
+    function _initialize(address anOwner) internal virtual {
+        owner = anOwner;
+        emit SimpleAccountInitialized(_entryPoint, owner);
+    }
+
+    function _authorizeUpgrade(address newImplementation) internal pure override {
+        (newImplementation);
     }
 }
