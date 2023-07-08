@@ -34,7 +34,7 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
 
     function _onlyOwner() internal view {
         //directly from EOA owner, or through the account itself (which gets redirected through execute())
-        require(msg.sender == owner || msg.sender == address(this), "only owner");
+        require(msg.sender == owner || msg.sender == address(this), "SimpleAccount: Only owner");
     }
 
     /// @inheritdoc BaseAccount
@@ -52,6 +52,25 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
         return 0;
     }
 
+    /**
+     * EIP-1271 signature validation
+     */
+    function isValidSignature(bytes32 msgHash, bytes memory signature) public view returns (bytes4 magicValue) {
+        (uint8 v, bytes32 r, bytes32 s) = _splitSignature(signature);
+        require(owner == ecrecover(msgHash, v, r, s), "SimpleAccount: Invalid signature");
+        return 0x1626ba7e;
+    }
+
+    function _splitSignature(bytes memory signature) private pure returns (uint8 v, bytes32 r, bytes32 s) {
+        require(signature.length == 65, "SimpleAccount: Invalid signature length");
+
+        assembly {
+            r := mload(add(signature, 32))
+            s := mload(add(signature, 64))
+            v := byte(0, mload(add(signature, 96)))
+        }
+    }
+
     ///@dev execute a transaction (called directly from owner, or by entryPoint)
     function execute(address dest, uint256 value, bytes calldata func) external {
         _requireFromEntryPointOrOwner();
@@ -61,7 +80,7 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
     ///@dev execute a sequence of transactions
     function executeBatch(address[] calldata dest, bytes[] calldata func) external {
         _requireFromEntryPointOrOwner();
-        require(dest.length == func.length, "wrong array lengths");
+        require(dest.length == func.length, "SimpleAccount: Wrong array lengths");
         for (uint256 i = 0; i < dest.length; i++) {
             _call(dest[i], 0, func[i]);
         }
@@ -69,7 +88,7 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
 
     /// @dev Require the function call went through EntryPoint or owner
     function _requireFromEntryPointOrOwner() internal view {
-        require(msg.sender == address(entryPoint()) || msg.sender == owner, "account: not Owner or EntryPoint");
+        require(msg.sender == address(entryPoint()) || msg.sender == owner, "SimpleAccount: Not Owner or EntryPoint");
     }
 
     /// @dev Call a function on a contract
