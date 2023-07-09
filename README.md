@@ -1,4 +1,4 @@
-# AA Wallet Sample
+# AA Sample
 
 The project implements ERC-4337, Account Abstraction, allowing users to transfer and manage funds as a wallet, while also enabling the payment of transaction fees using ERC-20 tokens.
 
@@ -20,8 +20,8 @@ curl -L https://foundry.paradigm.xyz | bash
 Run the following command to clone the repo and build
 
 ```bash
-git clone git@github.com:Doge-is-Dope/wallet-sample.git
-cd wallet-sample
+git clone git@github.com:Doge-is-Dope/aa-sample.git
+cd aa-sample
 forge install
 forge build
 ```
