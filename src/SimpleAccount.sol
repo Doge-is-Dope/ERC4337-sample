@@ -72,17 +72,17 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
     }
 
     ///@dev execute a transaction (called directly from owner, or by entryPoint)
-    function execute(address dest, uint256 value, bytes calldata func) external {
+    function execute(address dest, uint256 value, bytes calldata data) external {
         _requireFromEntryPointOrOwner();
-        _call(dest, value, func);
+        _call(dest, value, data);
     }
 
     ///@dev execute a sequence of transactions
-    function executeBatch(address[] calldata dest, bytes[] calldata func) external {
+    function executeBatch(address[] calldata dest, bytes[] calldata data) external {
         _requireFromEntryPointOrOwner();
-        require(dest.length == func.length, "SimpleAccount: Wrong array lengths");
+        require(dest.length == data.length, "SimpleAccount: Wrong array lengths");
         for (uint256 i = 0; i < dest.length; i++) {
-            _call(dest[i], 0, func[i]);
+            _call(dest[i], 0, data[i]);
         }
     }
 
@@ -118,4 +118,8 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
     function _authorizeUpgrade(address newImplementation) internal pure override {
         (newImplementation);
     }
+
+    fallback() external {}
+
+    receive() external payable {}
 }
