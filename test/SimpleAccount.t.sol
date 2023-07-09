@@ -7,7 +7,7 @@ import "./helper/Setup.sol";
 contract SimpleAccountTest is Setup {
     function testTransferETH() public {
         // Transfer 0.01 ether to Bob as Alice
-        vm.startPrank(address(alice));
+        vm.startPrank(alice);
         account.execute(bob, 0.01 ether, "");
         assertEq(bob.balance, 0.01 ether);
         assertEq(address(account).balance, 0.99 ether);
@@ -19,17 +19,20 @@ contract SimpleAccountTest is Setup {
         assertEq(bob.balance, 0.02 ether);
         assertEq(address(account).balance, 0.98 ether);
         vm.stopPrank();
+
+        // Transfer 0.01 ether to Bob as Bob
+        vm.startPrank(bob);
+        vm.expectRevert("SimpleAccount: Not Owner or EntryPoint");
+        account.execute(bob, 0.01 ether, "");
+        vm.stopPrank();
     }
 
     function testTransferErc20() public {
         // Transfer 100 TKT to Bob as Alice
-        vm.startPrank(address(alice));
+        vm.startPrank(alice);
         _transferErc20(address(tkt), bob, 100e18);
         assertEq(tkt.balanceOf(bob), 100e18);
         assertEq(tkt.balanceOf(address(account)), 900e18);
-
-        console.log("alice balance: %s", alice.balance);
-        console.log("account balance: %s", address(account).balance);
         vm.stopPrank();
     }
 
