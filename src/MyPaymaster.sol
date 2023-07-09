@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "account-abstraction/core/BasePaymaster.sol";
-import "./erc20/TestToken.sol";
+import "./tokens/TestToken.sol";
 
 /**
  * paymasterAndData holds the paymaster address followed by the token address to use.
@@ -31,8 +31,10 @@ contract MyPaymaster is BasePaymaster {
      * This method get the value of token to ETH.
      * Note: Should get the price from oracle in production
      */
-    function getTokenValueOfEth(IERC20 token, uint256 ethBought) internal view returns (uint256 valueToken) {
+    function _getTokenValueOfEth(IERC20 token, uint256 ethBought) internal pure returns (uint256 valueToken) {
         // (, int256 price, , , ) = AggregatorV3Interface(0x9326BFA02ADD2366b30bacB125260Af641031331).latestRoundData();
+        (token);
+        (ethBought);
         return 10e18; // hardcoded for testing
     }
 
@@ -59,7 +61,7 @@ contract MyPaymaster is BasePaymaster {
 
         IERC20 token = IERC20(address(bytes20(paymasterAndData[20:])));
         address account = userOp.getSender();
-        uint256 maxTokenCost = getTokenValueOfEth(token, maxCost);
+        uint256 maxTokenCost = _getTokenValueOfEth(token, maxCost);
 
         uint256 gasPriceUserOp = userOp.gasPrice();
         // require(unlockBlock[account] == 0, "MyPaymaster: deposit not locked");

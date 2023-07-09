@@ -6,7 +6,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "account-abstraction/core/EntryPoint.sol";
 import "../../src/SimpleAccountFactory.sol";
 import "../../src/SimpleAccount.sol";
-import "../..//src/erc20/TestToken.sol";
+import "../../src/tokens/TestToken.sol";
+import "../../src/tokens/TestItem.sol";
 
 contract Setup is Test {
     uint256 constant SALT = 0x001;
@@ -16,7 +17,8 @@ contract Setup is Test {
 
     EntryPoint entryPoint;
     SimpleAccount account; // Alice's contract account
-    IERC20 tkt;
+    IERC20 tkt; // ERC-20: TestToken
+    TestItem titm; // ERC-721: TestItem
 
     function setUp() public virtual {
         // Deploy the entry point
@@ -32,16 +34,20 @@ contract Setup is Test {
         deal(address(account), 1 ether);
         assertEq(address(account).balance, 1 ether);
 
-        // Deploy TKT
+        // Deploy ERC-20: TestToken
         tkt = new TestToken();
         // Fund 1000 TKT to alice's contract account
         deal(address(tkt), address(account), 1_000e18);
         assertEq(tkt.balanceOf(address(account)), 1_000e18);
+
+        // Deploy ERC-721: TestItem
+        titm = new TestItem();
 
         vm.label(alice, "Alice's EOA");
         vm.label(bob, "Bob's EOA");
         vm.label(address(account), "Alice's CA");
         vm.label(address(entryPoint), "entry point");
         vm.label(address(tkt), "Test Token");
+        vm.label(address(titm), "Test Item");
     }
 }
