@@ -32,11 +32,6 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
         return _entryPoint;
     }
 
-    function _onlyOwner() internal view {
-        //directly from EOA owner, or through the account itself (which gets redirected through execute())
-        require(msg.sender == owner || msg.sender == address(this), "SimpleAccount: Only owner");
-    }
-
     /// @inheritdoc BaseAccount
     /// @dev Check the signature
     function _validateSignature(UserOperation calldata userOp, bytes32 userOpHash)
@@ -86,11 +81,6 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
         }
     }
 
-    /// @dev Require the function call went through EntryPoint or owner
-    function _requireFromEntryPointOrOwner() internal view {
-        require(msg.sender == address(entryPoint()) || msg.sender == owner, "SimpleAccount: Not Owner or EntryPoint");
-    }
-
     /// @dev Call a function on a contract
     function _call(address target, uint256 value, bytes memory data) internal {
         (bool success, bytes memory result) = target.call{value: value}(data);
@@ -100,12 +90,38 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
             }
         }
     }
+    /**
+     * check current account deposit in the entryPoint
+     */
+
+    function getDeposit() public view returns (uint256) {
+        return entryPoint().balanceOf(address(this));
+    }
+
+    /**
+     * deposit more funds for this account in the entryPoint
+     */
+    function addDeposit() public payable {
+        entryPoint().depositTo{value: msg.value}(address(this));
+    }
+
+    /// @dev Only allow the owner to call the function
+    function _onlyOwner() internal view {
+        // Directly from EOA owner, or through the account itself (which gets redirected through execute())
+        require(msg.sender == owner || msg.sender == address(this), "SimpleAccount: Not owner");
+    }
+
+    /// @dev Require the function call went through EntryPoint or owner
+    function _requireFromEntryPointOrOwner() internal view {
+        require(msg.sender == address(entryPoint()) || msg.sender == owner, "SimpleAccount: Not Owner or EntryPoint");
+    }
 
     /**
      * @dev The _entryPoint member is immutable, to reduce gas consumption.  To upgrade EntryPoint,
      * a new implementation of Account must be deployed with the new EntryPoint address, then upgrading
      * the implementation by calling `upgradeTo()`
      */
+
     function initialize(address anOwner) public virtual initializer {
         _initialize(anOwner);
     }
@@ -115,8 +131,9 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
         emit SimpleAccountInitialized(_entryPoint, owner);
     }
 
-    function _authorizeUpgrade(address newImplementation) internal pure override {
+    function _authorizeUpgrade(address newImplementation) internal view override {
         (newImplementation);
+        _onlyOwner();
     }
 
     fallback() external {}
