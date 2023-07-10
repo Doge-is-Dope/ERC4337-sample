@@ -6,7 +6,7 @@ The project implements ERC-4337, Account Abstraction, allowing users to transfer
 
 - Transfer ether and tokens conforming to ERC-20, ERC-721, and ERC-1155 standards as normal wallet
 - Perform multiple transactions in one single on-chain transaction, aka batch transaction
-- Pay the transaction fee using ERC-20 tokens, `TestToken` ,instead of ether
+- Pay the transaction fee using ERC-20 tokens, `TestToken`, instead of ether
 - Custom modules, e.g. `SpendLimit` for preventing spending more tokens than the limit set by the account's owner
 
 ## How to build
