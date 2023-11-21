@@ -20,7 +20,7 @@ curl -L https://foundry.paradigm.xyz | bash
 Run the following command to clone the repo and build
 
 ```bash
-git clone git@github.com:Doge-is-Dope/aa-sample.git
+git clone git@github.com:Doge-is-Dope/ERC4337-sample.git
 cd aa-sample
 forge install
 forge build
