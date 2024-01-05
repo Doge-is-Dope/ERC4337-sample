@@ -21,7 +21,7 @@ Run the following command to clone the repo and build
 
 ```bash
 git clone git@github.com:Doge-is-Dope/ERC4337-sample.git
-cd aa-sample
+cd ERC4337-sample
 forge install
 forge build
 ```
