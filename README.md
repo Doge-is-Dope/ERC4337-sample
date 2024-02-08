@@ -1,4 +1,4 @@
-# AA Sample
+# ERC-4337 Sample
 
 The project implements ERC-4337, Account Abstraction, allowing users to transfer and manage funds as a wallet, while also enabling the payment of transaction fees using ERC-20 tokens.
 
